@@ -68,9 +68,27 @@ python scripts/analyze_dataset.py --verify   # ek olarak bozuk görüntü tarama
 - **Bölme:** Stratified %70 train / %15 val / %15 test (sınıf dağılımı korunur, sabit tohum=42)
 - Val/test verisine veri çoğaltma **uygulanmaz** (deterministik değerlendirme için).
 
+## Model Eğitimi (Adım 2)
+
+```bash
+python train.py                              # varsayılan: EfficientNet-B0, 30 epoch
+python train.py --epochs 40 --lr 5e-4 --dropout 0.4 --batch-size 32
+python train.py --arch mobilenet_v3_large    # mimariyi değiştir
+python train.py --smoke-test                 # 2 epoch x 2 batch hızlı doğrulama
+```
+
+- **Mimari:** EfficientNet-B0 (varsayılan; ~15.5 MB ≪ 95 MB sınırı). Ayrıca
+  `mobilenet_v3_large/small`, `resnet18` desteklenir. Transfer learning (ImageNet).
+- **Ayarlanabilir hiperparametreler:** `--epochs`, `--batch-size`, `--lr`,
+  `--weight-decay`, `--dropout`, `--label-smoothing`, `--patience`, `--freeze-epochs`.
+- **EarlyStopping:** doğrulama macro-F1 izlenir (F1 = 1. öncelikli metrik), iyileşme
+  durunca eğitim durur.
+- **Çıktılar:** en iyi model `outputs/checkpoints/best_model.pt`; epoch logları
+  `outputs/logs/training_log.csv` ve `history.json` (Adım 3 grafikleri bunları kullanır).
+
 ## Yol Haritası
 
 - [x] **Adım 1:** Proje yapısı + veri ön işleme (preprocessing + augmentation)
-- [ ] **Adım 2:** Model mimarisi + eğitim hattı (EarlyStopping, <95 MB model)
+- [x] **Adım 2:** Model mimarisi + eğitim hattı (EarlyStopping, <95 MB model)
 - [ ] **Adım 3:** Değerlendirme metrikleri + grafikler (F1 öncelikli, confusion matrix)
 - [ ] **Adım 4:** Canlı tahmin web arayüzü
