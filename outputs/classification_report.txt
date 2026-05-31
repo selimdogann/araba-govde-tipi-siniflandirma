@@ -1,0 +1,14 @@
+                 precision    recall  f1-score   support
+
+      HATCHBACK     0.7581    0.4700    0.5802       100
+          MICRO     1.0000    0.9608    0.9800       102
+AÇIK TEKERLEKLİ     1.0000    1.0000    1.0000        89
+        PICK UP     0.9451    0.8687    0.9053        99
+          SEDAN     0.6049    0.9703    0.7452       101
+  STATION WAGON     0.9767    0.8571    0.9130        98
+            SUV     0.8137    0.8384    0.8259        99
+            VAN     1.0000    0.9800    0.9899       100
+
+       accuracy                         0.8668       788
+      macro avg     0.8873    0.8682    0.8674       788
+   weighted avg     0.8855    0.8668    0.8656       788

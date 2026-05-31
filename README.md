@@ -118,6 +118,23 @@ Arayüz bileşenleri (proje şartlarına göre):
 Yeniden kullanılabilir çıkarım API'si: `src/inference.py` içindeki `Predictor` sınıfı
 (jürinin test scripti `from src.inference import Predictor` ile çağırabilir).
 
+## Sonuçlar (Test Kümesi — 788 görüntü)
+
+Model: **EfficientNet-B0** (transfer learning) · boyut **16 MB** (< 95 MB) · iki aşamalı
+eğitim (3 epoch head ısıtma + ince ayar), EarlyStopping.
+
+| Metrik | Değer |
+|--------|-------|
+| **Macro F1** (1. öncelik) | **0.867** |
+| Weighted F1 | 0.866 |
+| Accuracy | 0.867 |
+
+**Sınıf bazlı F1:** AÇIK TEKERLEKLİ 1.00 · VAN 0.99 · MICRO 0.98 · STATION WAGON 0.91 ·
+PICK UP 0.91 · SUV 0.83 · SEDAN 0.75 · HATCHBACK 0.58.
+
+> En zayıf nokta HATCHBACK ↔ SEDAN karışıklığı (görsel benzerlik). Grafikler:
+> `outputs/figures/{loss_curve,accuracy_curve,confusion_matrix}.png`.
+
 ## Yol Haritası
 
 - [x] **Adım 1:** Proje yapısı + veri ön işleme (preprocessing + augmentation)
