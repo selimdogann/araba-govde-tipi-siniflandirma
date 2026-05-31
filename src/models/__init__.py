@@ -5,6 +5,7 @@ from .model import (
     set_backbone_trainable,
     count_parameters,
     estimate_model_size_mb,
+    load_checkpoint_model,
     SUPPORTED_ARCHS,
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "set_backbone_trainable",
     "count_parameters",
     "estimate_model_size_mb",
+    "load_checkpoint_model",
     "SUPPORTED_ARCHS",
 ]

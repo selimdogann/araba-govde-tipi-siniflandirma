@@ -86,9 +86,23 @@ python train.py --smoke-test                 # 2 epoch x 2 batch hızlı doğrul
 - **Çıktılar:** en iyi model `outputs/checkpoints/best_model.pt`; epoch logları
   `outputs/logs/training_log.csv` ve `history.json` (Adım 3 grafikleri bunları kullanır).
 
+## Değerlendirme ve Grafikler (Adım 3)
+
+```bash
+python evaluate.py                 # test kümesinde değerlendir + 3 grafiği üret
+python evaluate.py --split val     # doğrulama kümesinde değerlendir
+```
+
+- **Metrikler:** sınıf bazlı (per-class) + macro/weighted ortalama Accuracy, Precision,
+  Recall, F1 → ekrana yazılır ve `outputs/metrics.json` + `classification_report.txt`.
+- **Üretilen grafikler** (`outputs/figures/`):
+  - `loss_curve.png` — Training & Validation Loss
+  - `accuracy_curve.png` — Training & Validation Accuracy
+  - `confusion_matrix.png` — Normalized 8x8 Confusion Matrix (heatmap)
+
 ## Yol Haritası
 
 - [x] **Adım 1:** Proje yapısı + veri ön işleme (preprocessing + augmentation)
 - [x] **Adım 2:** Model mimarisi + eğitim hattı (EarlyStopping, <95 MB model)
-- [ ] **Adım 3:** Değerlendirme metrikleri + grafikler (F1 öncelikli, confusion matrix)
+- [x] **Adım 3:** Değerlendirme metrikleri + grafikler (F1 öncelikli, confusion matrix)
 - [ ] **Adım 4:** Canlı tahmin web arayüzü

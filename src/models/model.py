@@ -123,6 +123,35 @@ def count_parameters(model: nn.Module) -> tuple[int, int]:
     return total, trainable
 
 
+def load_checkpoint_model(
+    ckpt_path: str,
+    device: torch.device | str = "cpu",
+) -> tuple[nn.Module, dict]:
+    """
+    Eğitimde kaydedilen checkpoint'ten modeli YENİDEN KURAR ve ağırlıkları yükler.
+
+    train.py, modeli `state_dict` + meta veri (arch, class_names, img_size ...) olarak
+    kaydeder. Bu fonksiyon o meta veriyi okuyup aynı mimariyi kurar, ağırlıkları yükler
+    ve modeli DEĞERLENDİRME (eval) moduna alır. evaluate.py ve web arayüzü bunu kullanır.
+
+    Returns:
+        (model, checkpoint_dict). checkpoint_dict; class_names, img_size, val_f1 gibi
+        meta veriyi içerir.
+    """
+    # weights_only=False -> kaydedilen sözlükteki meta veriyi de okuyabilmek için.
+    checkpoint = torch.load(ckpt_path, map_location=device, weights_only=False)
+    model = build_model(
+        arch=checkpoint["arch"],
+        num_classes=checkpoint["num_classes"],
+        dropout=checkpoint.get("dropout", 0.0),
+        pretrained=False,  # ağırlıkları zaten checkpoint'ten yükleyeceğiz
+    )
+    model.load_state_dict(checkpoint["model_state"])
+    model.to(device)
+    model.eval()  # inferans için: dropout kapalı, BatchNorm sabit
+    return model, checkpoint
+
+
 def estimate_model_size_mb(model: nn.Module) -> float:
     """
     Modelin diske kaydedildiğinde yaklaşık kaç MB tutacağını tahmin eder.
