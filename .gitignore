@@ -1,0 +1,47 @@
+# ==========================================================================
+# Araba Gövde Tipi Sınıflandırma Projesi - .gitignore
+# GitHub'a YALNIZCA kod, grafikler ve rapor gitmelidir.
+# Ham veri seti, sanal ortam ve büyük model ağırlık dosyaları HARİÇ tutulur.
+# ==========================================================================
+
+# --- Ham veri seti (GitHub'a yüklenmemeli) ---
+# "/data/*" -> kök data/ klasörünün İÇERİĞİ hariç tutulur (görseller),
+# ama klasörün kendisine girilebildiği için .gitkeep negasyonla dahil edilebilir.
+# src/data/ paketi bundan ETKİLENMEZ.
+/data/*
+!/data/.gitkeep
+
+# --- Python sanal ortamı ---
+.venv/
+venv/
+env/
+
+# --- Eğitilmiş model ağırlıkları (büyük dosyalar) ---
+*.pt
+*.pth
+*.h5
+*.onnx
+*.ckpt
+*.tflite
+
+# --- Eğitim çıktıları (loglar / checkpoint'ler) ---
+outputs/checkpoints/
+outputs/logs/
+*.log
+
+# --- Python derleme / cache dosyaları ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.ipynb_checkpoints/
+
+# --- İşletim sistemi / editör dosyaları ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# --- Test/önbellek ---
+.pytest_cache/
+.cache/

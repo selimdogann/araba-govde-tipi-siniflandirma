@@ -1,0 +1,12 @@
+# Araba Gövde Tipi Sınıflandırma Projesi - Python bağımlılıkları
+# Kurulum:  python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+
+torch>=2.0          # Derin öğrenme çatısı (Apple Silicon'da MPS hızlandırma)
+torchvision>=0.15   # Önceden eğitilmiş modeller (MobileNetV3, EfficientNet...) + görüntü dönüşümleri
+numpy>=1.24         # Sayısal işlemler
+pillow>=9.0         # Görüntü okuma/yazma (JPEG, PNG)
+matplotlib>=3.6     # Grafik çizimi (loss/accuracy eğrileri, confusion matrix)
+scikit-learn>=1.2   # Stratified split + metrikler (precision/recall/F1, confusion matrix)
+seaborn>=0.12       # Confusion matrix heatmap görselleştirmesi
+tqdm>=4.64          # Eğitim sırasında ilerleme çubuğu
+streamlit>=1.28     # Canlı tahmin web arayüzü (Adım 4)
