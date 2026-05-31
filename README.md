@@ -100,9 +100,27 @@ python evaluate.py --split val     # doğrulama kümesinde değerlendir
   - `accuracy_curve.png` — Training & Validation Accuracy
   - `confusion_matrix.png` — Normalized 8x8 Confusion Matrix (heatmap)
 
+## Web Arayüzü — Canlı Tahmin (Adım 4)
+
+```bash
+streamlit run app/app.py        # tarayıcıda açılır (http://localhost:8501)
+python predict.py yol/araba.jpg # komut satırından tek görüntü tahmini (test scripti entegrasyonu)
+```
+
+Arayüz bileşenleri (proje şartlarına göre):
+- **Görüntü yükleme** (sürükle-bırak) + **önizleme**
+- **"Tahmin Yap"** butonu
+- Tahmin edilen **gövde tipi (büyük)** + **güven skoru** + çıkarım süresi (ms)
+- 8 sınıf için **olasılık dağılımı çubuk grafiği**
+- Yüklenen görsel ile sonuç **yan yana** düzen
+- Model `@st.cache_resource` ile bir kez yüklenir (hızlı tahmin)
+
+Yeniden kullanılabilir çıkarım API'si: `src/inference.py` içindeki `Predictor` sınıfı
+(jürinin test scripti `from src.inference import Predictor` ile çağırabilir).
+
 ## Yol Haritası
 
 - [x] **Adım 1:** Proje yapısı + veri ön işleme (preprocessing + augmentation)
 - [x] **Adım 2:** Model mimarisi + eğitim hattı (EarlyStopping, <95 MB model)
 - [x] **Adım 3:** Değerlendirme metrikleri + grafikler (F1 öncelikli, confusion matrix)
-- [ ] **Adım 4:** Canlı tahmin web arayüzü
+- [x] **Adım 4:** Canlı tahmin web arayüzü
