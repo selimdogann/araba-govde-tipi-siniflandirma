@@ -5,6 +5,20 @@ Kocaeli Üniversitesi – Bilgisayar Mühendisliği – Yazılım Laboratuvarı-
 8 araba gövde tipini (SUV, VAN, STATION WAGON, MICRO, AÇIK TEKERLEKLİ, SEDAN,
 HATCHBACK, PICK UP) görüntüden sınıflandıran derin öğrenme projesi.
 
+## Ekran görüntüleri
+
+Streamlit arayüzünde bir araba görseli yükleyin; model gövde tipini tahmin eder,
+güven skorunu ve tüm sınıfların olasılık dağılımını gösterir. Farklı gövde
+tiplerinden örnekler:
+
+| Açık tekerlekli · %97 | Station wagon · %96 |
+|---|---|
+| ![Açık tekerlekli](docs/screenshots/01-acik-tekerlekli.png) | ![Station wagon](docs/screenshots/02-station-wagon.png) |
+
+| SUV · %95 | Sedan · %96 |
+|---|---|
+| ![SUV](docs/screenshots/03-suv.png) | ![Sedan](docs/screenshots/04-sedan.png) |
+
 ## Kurulum
 
 ```bash
