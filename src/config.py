@@ -10,6 +10,7 @@ ilkesi. Bir değeri (örn. görüntü boyutu) değiştirmek istediğimizde sadec
 güncelleriz; kod tekrarını ve uyumsuzluk hatalarını önler.
 """
 
+import os
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -22,6 +23,11 @@ OUTPUTS_DIR: Path = PROJECT_ROOT / "outputs"     # grafikler, loglar, model çı
 FIGURES_DIR: Path = OUTPUTS_DIR / "figures"      # kaydedilen grafikler (png)
 CHECKPOINTS_DIR: Path = OUTPUTS_DIR / "checkpoints"  # eğitilmiş model ağırlıkları (.pt)
 LOGS_DIR: Path = OUTPUTS_DIR / "logs"            # epoch bazlı eğitim logları (csv/json)
+
+# Arayüzün ve predict.py'nin kullandığı model dosyası.
+# MODEL_PATH ortam değişkeniyle değiştirilebilir (ör. modeli başka klasörde tutmak
+# ya da testlerde sahte bir model vermek için):  MODEL_PATH=/yol/model.pt streamlit run app/app.py
+CHECKPOINT_PATH: Path = Path(os.environ.get("MODEL_PATH", CHECKPOINTS_DIR / "best_model.pt"))
 
 # ---------------------------------------------------------------------------
 # 2) SINIFLAR (8 araba gövde tipi)

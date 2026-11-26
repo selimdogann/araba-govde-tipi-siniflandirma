@@ -80,7 +80,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--img-size", type=int, default=config.IMG_SIZE, help="Görüntü giriş boyutu")
     p.add_argument("--num-workers", type=int, default=config.NUM_WORKERS, help="DataLoader işçi sayısı")
     p.add_argument("--seed", type=int, default=config.RANDOM_SEED, help="Rastgelelik tohumu")
-    # --- Çıktı / hızlı test ---
+    # --- Veri / çıktı / hızlı test ---
+    p.add_argument("--data-dir", type=str, default=str(config.DATA_DIR),
+                   help="8 sınıf klasörünü içeren veri dizini")
     p.add_argument("--output-dir", type=str, default=str(config.OUTPUTS_DIR), help="Çıktı kök dizini")
     p.add_argument("--smoke-test", action="store_true",
                    help="Sadece 2 epoch x 2 batch çalıştır (pipeline'ı hızlıca doğrulamak için)")
@@ -108,6 +110,7 @@ def main() -> None:
     # --- Veri ---
     print("Veri yükleniyor...")
     train_loader, val_loader, test_loader, class_names = build_dataloaders(
+        data_dir=args.data_dir,
         img_size=args.img_size,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
