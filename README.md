@@ -8,16 +8,14 @@ EfficientNet-B0 transfer learning ile eğitildi. Test kümesinde **macro F1 0,86
 
 Kocaeli Üniversitesi, Bilgisayar Mühendisliği, Yazılım Laboratuvarı-II / Proje III.
 
-![Arayüz](docs/screenshots/arayuz.png)
-
 ## Ne yapıyor?
 
-1. Streamlit arayüzünde bir araba fotoğrafı yüklersiniz.
-2. **Tahmin Yap**'a basınca model gövde tipini plaka biçiminde, güven skoruyla gösterir.
-3. 8 tipin olasılıkları büyükten küçüğe sıralanır.
-4. Model iki tip arasında kaldıysa (en sık HATCHBACK ↔ SEDAN) bunu açıkça yazar.
+1. Streamlit arayüzünde bir araba fotoğrafı yüklersiniz; görsel solda görünür.
+2. **Sınıflandır**'a basınca model gövde tipini, güven skorunu ve tahmin süresini gösterir.
+3. En olası 3 tip tabloda, 8 tipin tamamı çubuk grafikte yer alır.
+4. Model iki tip arasında kaldıysa (en sık HATCHBACK ↔ SEDAN) bunu bir uyarıyla söyler.
 
-Gerçek modelle alınmış örnek tahminler (önceki arayüz sürümünden):
+Gerçek modelle alınmış örnek tahminler:
 
 | Açık tekerlekli · %97 | Station wagon · %96 |
 |---|---|
@@ -146,14 +144,14 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-40 test var. Gerçek veri seti ve model gerekmez: testler minik bir sahte veri seti ve
+39 test var. Gerçek veri seti ve model gerekmez: testler minik bir sahte veri seti ve
 rastgele ağırlıklı bir model üretip hattın uçtan uca çalıştığını doğrular. Kapsam:
 
 - **Veri:** sınıf sırası, dönüşümler, bölmeler arası sızıntı olmaması, her sınıfın teste girmesi.
 - **Model:** 4 mimarinin çıktısı, backbone dondurma, EarlyStopping, metrikler.
 - **Tahmin:** olasılıkların toplamı, farklı renk modları, telefon fotoğrafının EXIF yönü.
 - **Komut satırı:** `predict.py` hata mesajları, `train.py --smoke-test` → `evaluate.py`.
-- **Arayüz:** model yokken hata mesajı, boş durum, Türkçe yüzde biçimi, kararsızlık kuralı.
+- **Arayüz:** model yokken hata mesajı, yükleme bekleme durumu, Türkçe yüzde biçimi, kararsızlık kuralı.
 
 Her push ve PR'da GitHub Actions aynı testleri çalıştırır.
 
@@ -163,8 +161,8 @@ Her push ve PR'da GitHub Actions aynı testleri çalıştırır.
 .
 ├── app/
 │   ├── app.py                  # Streamlit arayüzü
-│   └── ui.py                   # Arayüzün HTML/CSS parçaları ve kararsızlık kuralı
-├── .streamlit/config.toml      # Tema: renkler ve yazı tipi
+│   └── ui.py                   # Yüzde biçimi ve kararsızlık kuralı
+├── .streamlit/config.toml      # Tema: koyu zemin, kırmızı buton
 ├── src/
 │   ├── config.py               # Tüm sabitler (sınıflar, yollar, boyutlar)
 │   ├── data/dataset.py         # Dönüşümler + stratified split + DataLoader

@@ -1,17 +1,11 @@
-# Streamlit tema ayarları: açık tema, sade renkler, Barlow yazı tipi.
-# Renk kaynağı: Türk plakasının mavi şeridi (vurgu) + asfalt grisi (zemin).
+# Streamlit tema ayarları: README ekran görüntülerindeki koyu tema ve kırmızı buton.
 
 [theme]
-base = "light"
-primaryColor = "#1F4BA5"              # plaka mavisi: yalnız eylem ve tahmin vurgusu
-backgroundColor = "#F3F5F7"           # açık asfalt grisi zemin
-secondaryBackgroundColor = "#FFFFFF"  # yükleme alanı ve kartlar
-textColor = "#15191F"
-borderColor = "#DCE1E7"
-showWidgetBorder = true
-baseRadius = "8px"
-font = "Barlow:https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&display=swap, sans-serif"
-headingFont = "Barlow Condensed:https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&display=swap, sans-serif"
+base = "dark"
+primaryColor = "#FF0000"              # kırmızı "Sınıflandır" butonu
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#FAFAFA"
 
 [client]
 toolbarMode = "minimal"   # sağ üstteki geliştirici menüsünü sadeleştirir
