@@ -1,0 +1,25 @@
+# Her push ve PR'da testleri çalıştırır.
+name: Testler
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      # GPU'suz sunucuda CUDA'lı dev torch paketine gerek yok; CPU sürümü çok daha küçük.
+      - name: Bağımlılıkları kur
+        run: |
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+      - name: Testleri çalıştır
+        run: pytest -q

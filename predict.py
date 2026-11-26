@@ -15,6 +15,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
+from pathlib import Path
+
+from PIL import UnidentifiedImageError
 
 from src import config
 from src.inference import Predictor
@@ -23,14 +27,23 @@ from src.inference import Predictor
 def main() -> None:
     parser = argparse.ArgumentParser(description="Tek görüntü tahmini")
     parser.add_argument("image", type=str, help="Sınıflandırılacak görüntü dosyası yolu")
-    parser.add_argument("--checkpoint", type=str,
-                        default=str(config.CHECKPOINTS_DIR / "best_model.pt"))
+    parser.add_argument("--checkpoint", type=str, default=str(config.CHECKPOINT_PATH))
     parser.add_argument("--device", type=str, default="cpu", choices=["cpu", "mps", "cuda"])
     parser.add_argument("--json", action="store_true", help="Tüm olasılıkları JSON olarak yazdır")
     args = parser.parse_args()
 
-    predictor = Predictor(checkpoint_path=args.checkpoint, device=args.device)
-    result = predictor.predict_path(args.image)
+    # Hatalı girdide uzun bir Python traceback yerine tek satırlık açıklama yazıp
+    # 1 koduyla çıkıyoruz; test scripti çıkış kodundan hatayı anlayabilir.
+    if not Path(args.image).is_file():
+        sys.exit(f"Hata: görüntü bulunamadı: {args.image}")
+    try:
+        predictor = Predictor(checkpoint_path=args.checkpoint, device=args.device)
+    except FileNotFoundError as exc:
+        sys.exit(f"Hata: {exc}")
+    try:
+        result = predictor.predict_path(args.image)
+    except UnidentifiedImageError:
+        sys.exit(f"Hata: dosya bir görüntü değil ya da bozuk: {args.image}")
 
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))

@@ -41,10 +41,12 @@ from src.utils.visualization import (
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Model değerlendirme ve grafik üretimi")
-    p.add_argument("--checkpoint", type=str, default=str(config.CHECKPOINTS_DIR / "best_model.pt"),
+    p.add_argument("--checkpoint", type=str, default=str(config.CHECKPOINT_PATH),
                    help="Değerlendirilecek model dosyası")
     p.add_argument("--split", type=str, default="test", choices=["test", "val"],
                    help="Hangi küme üzerinde değerlendirilsin (varsayılan: test)")
+    p.add_argument("--data-dir", type=str, default=str(config.DATA_DIR),
+                   help="8 sınıf klasörünü içeren veri dizini (eğitimdekiyle aynı olmalı)")
     p.add_argument("--output-dir", type=str, default=str(config.OUTPUTS_DIR))
     p.add_argument("--batch-size", type=int, default=config.BATCH_SIZE)
     p.add_argument("--num-workers", type=int, default=0)
@@ -71,6 +73,7 @@ def main() -> None:
 
     # --- Veri (aynı tohum -> aynı test bölmesi; eğitimde görülmedi) ---
     train_loader, val_loader, test_loader, _ = build_dataloaders(
+        data_dir=args.data_dir,
         img_size=ckpt.get("img_size", config.IMG_SIZE),
         batch_size=args.batch_size,
         num_workers=args.num_workers,
@@ -94,7 +97,9 @@ def main() -> None:
     print(f"\nMetrikler kaydedildi: {output_dir / 'metrics.json'}")
 
     # --- GRAFİK 1 & 2: history.json'dan loss/accuracy eğrileri ---
-    history_path = config.LOGS_DIR / "history.json"
+    # train.py logları <output-dir>/logs altına yazar; aynı yerden okumalıyız.
+    # (Eskiden sabit config.LOGS_DIR okunuyordu: --output-dir verilince grafikler atlanıyordu.)
+    history_path = output_dir / "logs" / "history.json"
     print("\nGrafikler üretiliyor...")
     if history_path.exists():
         with open(history_path) as f:

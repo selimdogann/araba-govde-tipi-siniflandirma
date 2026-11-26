@@ -1,15 +1,23 @@
-# Araba Gövde Tipi Sınıflandırma Projesi
+# Araba Gövde Tipi Sınıflandırma
 
-Kocaeli Üniversitesi – Bilgisayar Mühendisliği – Yazılım Laboratuvarı-II / Proje III
+[![Testler](https://github.com/selimdogann/araba-govde-tipi-siniflandirma/actions/workflows/tests.yml/badge.svg)](https://github.com/selimdogann/araba-govde-tipi-siniflandirma/actions/workflows/tests.yml)
 
-8 araba gövde tipini (SUV, VAN, STATION WAGON, MICRO, AÇIK TEKERLEKLİ, SEDAN,
-HATCHBACK, PICK UP) görüntüden sınıflandıran derin öğrenme projesi.
+Bir araba fotoğrafından gövde tipini bulan derin öğrenme projesi. 8 sınıf var: SUV, VAN,
+STATION WAGON, MICRO, AÇIK TEKERLEKLİ, SEDAN, HATCHBACK, PICK UP.
+EfficientNet-B0 transfer learning ile eğitildi. Test kümesinde **macro F1 0,867**.
 
-## Ekran görüntüleri
+Kocaeli Üniversitesi, Bilgisayar Mühendisliği, Yazılım Laboratuvarı-II / Proje III.
 
-Streamlit arayüzünde bir araba görseli yükleyin; model gövde tipini tahmin eder,
-güven skorunu ve tüm sınıfların olasılık dağılımını gösterir. Farklı gövde
-tiplerinden örnekler:
+![Arayüz](docs/screenshots/arayuz.png)
+
+## Ne yapıyor?
+
+1. Streamlit arayüzünde bir araba fotoğrafı yüklersiniz.
+2. **Tahmin Yap**'a basınca model gövde tipini plaka biçiminde, güven skoruyla gösterir.
+3. 8 tipin olasılıkları büyükten küçüğe sıralanır.
+4. Model iki tip arasında kaldıysa (en sık HATCHBACK ↔ SEDAN) bunu açıkça yazar.
+
+Gerçek modelle alınmış örnek tahminler (önceki arayüz sürümünden):
 
 | Açık tekerlekli · %97 | Station wagon · %96 |
 |---|---|
@@ -19,17 +27,68 @@ tiplerinden örnekler:
 |---|---|
 | ![SUV](docs/screenshots/03-suv.png) | ![Sedan](docs/screenshots/04-sedan.png) |
 
-## Kurulum
+## Hızlı başlangıç
 
 ```bash
+git clone https://github.com/selimdogann/araba-govde-tipi-siniflandirma.git
+cd araba-govde-tipi-siniflandirma
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Veri Seti
+### Model dosyası
 
-Ham görseller `data/` altında, her sınıf bir alt klasör olacak şekilde durmalıdır:
+Eğitilmiş model (`best_model.pt`, ~16 MB) boyut nedeniyle repoda yok. İki seçenek var:
+
+- Hazır dosyayı `outputs/checkpoints/best_model.pt` yoluna koyun, ya da başka bir yerdeyse
+  `MODEL_PATH=/yol/best_model.pt` ortam değişkeniyle gösterin.
+- Ya da veri setini indirip modeli kendiniz eğitin ([Eğitim](#eğitim)).
+
+### Arayüzü çalıştırma
+
+```bash
+streamlit run app/app.py            # http://localhost:8501
+python predict.py yol/araba.jpg     # komut satırından tek fotoğraf
+python predict.py yol/araba.jpg --json
+```
+
+Kendi kodunuzdan çağırmak için:
+
+```python
+from src.inference import Predictor
+
+predictor = Predictor()                       # varsayılan model yolu
+result = predictor.predict_path("araba.jpg")
+print(result["pred_label"], result["confidence"])
+```
+
+## Sonuçlar (test kümesi, 788 görüntü)
+
+| Metrik | Değer |
+|--------|-------|
+| **Macro F1** (1. öncelik) | **0,867** |
+| Weighted F1 | 0,866 |
+| Accuracy | 0,867 |
+
+Sınıf bazlı F1:
+
+| Sınıf | F1 | Sınıf | F1 |
+|---|---|---|---|
+| AÇIK TEKERLEKLİ | 1,00 | PICK UP | 0,91 |
+| VAN | 0,99 | SUV | 0,83 |
+| MICRO | 0,98 | SEDAN | 0,75 |
+| STATION WAGON | 0,91 | HATCHBACK | 0,58 |
+
+**En zayıf nokta:** gerçek HATCHBACK'lerin yarısına yakını (%48) SEDAN olarak tahmin
+ediliyor. İki tip yandan bakınca çok benziyor. Arayüz bu durumda kullanıcıyı uyarıyor.
+Tüm sayılar `outputs/metrics.json` ve `outputs/classification_report.txt` içinde.
+
+![Confusion matrix](outputs/figures/confusion_matrix.png)
+
+## Veri seti
+
+Görseller `data/` altında, her sınıf bir klasör olacak şekilde durur:
 
 ```
 data/
@@ -39,119 +98,89 @@ data/
 ├── pickup/         └── van/
 ```
 
-> `data/` klasörü `.gitignore` ile hariç tutulur (ham görseller GitHub'a yüklenmez).
-> Kaynak: Kaggle "Cars Body Type Cropped" & "Stanford Car Body Type Data" referans
-> alınarak oluşturulan özelleştirilmiş veri seti.
-
-Mevcut veri seti dengeli: sınıf başına ~597–680 görsel, toplam 5253 (dengesizlik oranı 1.14x).
-
-## Proje Yapısı
-
-```
-.
-├── data/                       # Ham veri seti (gitignored)
-├── src/
-│   ├── config.py               # Tüm sabitler/hiperparametreler (tek doğruluk kaynağı)
-│   ├── data/
-│   │   └── dataset.py          # Transform + stratified split + DataLoader hattı
-│   ├── models/                 # Model mimarileri (Adım 2)
-│   └── utils/
-│       └── analysis.py         # Sınıf dengesi analizi, sınıf ağırlıkları, bozuk görüntü taraması
-├── scripts/
-│   └── analyze_dataset.py      # Veri hattını uçtan uca doğrulayan + raporlayan script
-├── app/                        # Web arayüzü (Adım 4)
-├── outputs/figures/            # Üretilen grafikler
-└── requirements.txt
-```
-
-## Kullanım
-
-Veri seti analizini çalıştır (sınıf dengesi raporu + split özeti + grafikler):
+- Kaynak: Kaggle'daki "Cars Body Type Cropped" ve "Stanford Car Body Type Data" veri setleri
+  temel alınarak hazırlanan özel bir veri seti.
+- 5253 görsel, sınıf başına 597–680 (dengesizlik oranı 1,14x).
+- `data/` klasörü `.gitignore` ile dışarıda tutulur; görseller GitHub'a yüklenmez.
 
 ```bash
-python scripts/analyze_dataset.py            # analiz + grafik
+python scripts/analyze_dataset.py            # sınıf dengesi + split özeti + grafikler
 python scripts/analyze_dataset.py --verify   # ek olarak bozuk görüntü taraması
 ```
 
-## Ön İşleme Adımları (Adım 1)
-
-- **Boyutlandırma:** 224×224 (model giriş boyutu)
-- **Normalizasyon:** ImageNet mean/std (transfer learning ile uyumlu)
-- **Veri çoğaltma (sadece eğitim):** RandomResizedCrop, yatay çevirme, ±15° döndürme,
-  ColorJitter (parlaklık/kontrast/doygunluk/ton), küçük öteleme, RandomErasing
-- **Bölme:** Stratified %70 train / %15 val / %15 test (sınıf dağılımı korunur, sabit tohum=42)
-- Val/test verisine veri çoğaltma **uygulanmaz** (deterministik değerlendirme için).
-
-## Model Eğitimi (Adım 2)
+## Eğitim
 
 ```bash
-python train.py                              # varsayılan: EfficientNet-B0, 30 epoch
+python train.py --freeze-epochs 3            # sonuçlardaki ayar: 3 epoch head ısıtma + ince ayar
 python train.py --epochs 40 --lr 5e-4 --dropout 0.4 --batch-size 32
 python train.py --arch mobilenet_v3_large    # mimariyi değiştir
-python train.py --smoke-test                 # 2 epoch x 2 batch hızlı doğrulama
+python train.py --smoke-test                 # 2 epoch x 2 batch hızlı kontrol
 ```
 
-- **Mimari:** EfficientNet-B0 (varsayılan; ~15.5 MB ≪ 95 MB sınırı). Ayrıca
-  `mobilenet_v3_large/small`, `resnet18` desteklenir. Transfer learning (ImageNet).
-- **Ayarlanabilir hiperparametreler:** `--epochs`, `--batch-size`, `--lr`,
-  `--weight-decay`, `--dropout`, `--label-smoothing`, `--patience`, `--freeze-epochs`.
-- **EarlyStopping:** doğrulama macro-F1 izlenir (F1 = 1. öncelikli metrik), iyileşme
-  durunca eğitim durur.
-- **Çıktılar:** en iyi model `outputs/checkpoints/best_model.pt`; epoch logları
-  `outputs/logs/training_log.csv` ve `history.json` (Adım 3 grafikleri bunları kullanır).
+- **Mimari:** EfficientNet-B0 (ImageNet ağırlıklarıyla transfer learning). Ayrıca
+  `mobilenet_v3_large`, `mobilenet_v3_small`, `resnet18` desteklenir. Hepsi 95 MB sınırının altında.
+- **Ön işleme:** 224×224, ImageNet mean/std normalizasyonu.
+- **Veri çoğaltma (yalnız eğitimde):** RandomResizedCrop, yatay çevirme, ±15° döndürme,
+  ColorJitter, küçük öteleme, RandomErasing.
+- **Bölme:** stratified %70 eğitim / %15 doğrulama / %15 test, sabit tohum (42).
+- **EarlyStopping:** doğrulama macro F1'i izlenir; iyileşme durunca eğitim biter.
+- **Çıktılar:** `outputs/checkpoints/best_model.pt`, `outputs/logs/training_log.csv`,
+  `outputs/logs/history.json`.
+- Ayarlanabilir: `--epochs`, `--batch-size`, `--lr`, `--weight-decay`, `--dropout`,
+  `--label-smoothing`, `--patience`, `--freeze-epochs`, `--data-dir`, `--output-dir`.
 
-## Değerlendirme ve Grafikler (Adım 3)
+## Değerlendirme
 
 ```bash
-python evaluate.py                 # test kümesinde değerlendir + 3 grafiği üret
-python evaluate.py --split val     # doğrulama kümesinde değerlendir
+python evaluate.py                 # test kümesinde metrikler + 3 grafik
+python evaluate.py --split val     # doğrulama kümesinde
 ```
 
-- **Metrikler:** sınıf bazlı (per-class) + macro/weighted ortalama Accuracy, Precision,
-  Recall, F1 → ekrana yazılır ve `outputs/metrics.json` + `classification_report.txt`.
-- **Üretilen grafikler** (`outputs/figures/`):
-  - `loss_curve.png` — Training & Validation Loss
-  - `accuracy_curve.png` — Training & Validation Accuracy
-  - `confusion_matrix.png` — Normalized 8x8 Confusion Matrix (heatmap)
+Üretilenler: `outputs/metrics.json`, `outputs/classification_report.txt` ve
+`outputs/figures/` altında `loss_curve.png`, `accuracy_curve.png`, `confusion_matrix.png`.
 
-## Web Arayüzü — Canlı Tahmin (Adım 4)
+## Testler
 
 ```bash
-streamlit run app/app.py        # tarayıcıda açılır (http://localhost:8501)
-python predict.py yol/araba.jpg # komut satırından tek görüntü tahmini (test scripti entegrasyonu)
+pip install -r requirements-dev.txt
+pytest
 ```
 
-Arayüz bileşenleri (proje şartlarına göre):
-- **Görüntü yükleme** (sürükle-bırak) + **önizleme**
-- **"Tahmin Yap"** butonu
-- Tahmin edilen **gövde tipi (büyük)** + **güven skoru** + çıkarım süresi (ms)
-- 8 sınıf için **olasılık dağılımı çubuk grafiği**
-- Yüklenen görsel ile sonuç **yan yana** düzen
-- Model `@st.cache_resource` ile bir kez yüklenir (hızlı tahmin)
+40 test var. Gerçek veri seti ve model gerekmez: testler minik bir sahte veri seti ve
+rastgele ağırlıklı bir model üretip hattın uçtan uca çalıştığını doğrular. Kapsam:
 
-Yeniden kullanılabilir çıkarım API'si: `src/inference.py` içindeki `Predictor` sınıfı
-(jürinin test scripti `from src.inference import Predictor` ile çağırabilir).
+- **Veri:** sınıf sırası, dönüşümler, bölmeler arası sızıntı olmaması, her sınıfın teste girmesi.
+- **Model:** 4 mimarinin çıktısı, backbone dondurma, EarlyStopping, metrikler.
+- **Tahmin:** olasılıkların toplamı, farklı renk modları, telefon fotoğrafının EXIF yönü.
+- **Komut satırı:** `predict.py` hata mesajları, `train.py --smoke-test` → `evaluate.py`.
+- **Arayüz:** model yokken hata mesajı, boş durum, Türkçe yüzde biçimi, kararsızlık kuralı.
 
-## Sonuçlar (Test Kümesi — 788 görüntü)
+Her push ve PR'da GitHub Actions aynı testleri çalıştırır.
 
-Model: **EfficientNet-B0** (transfer learning) · boyut **16 MB** (< 95 MB) · iki aşamalı
-eğitim (3 epoch head ısıtma + ince ayar), EarlyStopping.
+## Proje yapısı
 
-| Metrik | Değer |
-|--------|-------|
-| **Macro F1** (1. öncelik) | **0.867** |
-| Weighted F1 | 0.866 |
-| Accuracy | 0.867 |
+```
+.
+├── app/
+│   ├── app.py                  # Streamlit arayüzü
+│   └── ui.py                   # Arayüzün HTML/CSS parçaları ve kararsızlık kuralı
+├── .streamlit/config.toml      # Tema: renkler ve yazı tipi
+├── src/
+│   ├── config.py               # Tüm sabitler (sınıflar, yollar, boyutlar)
+│   ├── data/dataset.py         # Dönüşümler + stratified split + DataLoader
+│   ├── models/model.py         # Mimari kurucu, dondurma, checkpoint yükleme
+│   ├── engine.py               # Eğitim/değerlendirme döngüleri, cihaz seçimi
+│   ├── inference.py            # Predictor: tek görüntü tahmini
+│   └── utils/                  # Analiz, EarlyStopping, metrikler, grafikler
+├── scripts/analyze_dataset.py  # Veri seti raporu
+├── train.py                    # Eğitim
+├── evaluate.py                 # Değerlendirme + grafikler
+├── predict.py                  # Komut satırından tahmin
+├── tests/                      # pytest testleri
+├── outputs/                    # Metrikler ve grafikler (model dosyası gitignored)
+└── data/                       # Veri seti (gitignored)
+```
 
-**Sınıf bazlı F1:** AÇIK TEKERLEKLİ 1.00 · VAN 0.99 · MICRO 0.98 · STATION WAGON 0.91 ·
-PICK UP 0.91 · SUV 0.83 · SEDAN 0.75 · HATCHBACK 0.58.
+## Lisans
 
-> En zayıf nokta HATCHBACK ↔ SEDAN karışıklığı (görsel benzerlik). Grafikler:
-> `outputs/figures/{loss_curve,accuracy_curve,confusion_matrix}.png`.
-
-## Yol Haritası
-
-- [x] **Adım 1:** Proje yapısı + veri ön işleme (preprocessing + augmentation)
-- [x] **Adım 2:** Model mimarisi + eğitim hattı (EarlyStopping, <95 MB model)
-- [x] **Adım 3:** Değerlendirme metrikleri + grafikler (F1 öncelikli, confusion matrix)
-- [x] **Adım 4:** Canlı tahmin web arayüzü
+MIT. Ayrıntı için [LICENSE](LICENSE).

@@ -18,7 +18,7 @@ from pathlib import Path
 
 import torch
 import torch.nn.functional as F
-from PIL import Image
+from PIL import Image, ImageOps
 
 from src import config
 from src.data.dataset import get_eval_transforms
@@ -30,7 +30,7 @@ class Predictor:
 
     def __init__(
         self,
-        checkpoint_path: str | Path = config.CHECKPOINTS_DIR / "best_model.pt",
+        checkpoint_path: str | Path = config.CHECKPOINT_PATH,
         device: str | torch.device = "cpu",
     ) -> None:
         """
@@ -54,6 +54,7 @@ class Predictor:
             [config.DISPLAY_NAMES.get(c, c) for c in self.class_names],
         )
         self.img_size: int = ckpt.get("img_size", config.IMG_SIZE)
+        self.arch: str = ckpt.get("arch", "?")  # arayüzde model adını göstermek için
         # Değerlendirme dönüşümü (eğitimdeki val/test ile AYNI: resize+centercrop+normalize).
         self.transform = get_eval_transforms(self.img_size)
 
@@ -75,6 +76,10 @@ class Predictor:
               "inference_ms": float,               # çıkarım süresi (ms)
             }
         """
+        # Telefon fotoğrafları pikselleri yan kaydedip yönü EXIF etiketinde tutar.
+        # exif_transpose görüntüyü gerçek yönüne çevirir; yoksa model yan yatmış
+        # bir araba görür ve yanlış tahmin yapar.
+        image = ImageOps.exif_transpose(image)
         # Girişi RGB'ye normalize et (palette/gri görüntüleri de güvenle işlemek için).
         image = image.convert("RGB")
 
@@ -103,4 +108,6 @@ class Predictor:
 
     def predict_path(self, image_path: str | Path) -> dict:
         """Dosya yolundan görüntü okuyup predict() çağırır (test scripti için pratik)."""
-        return self.predict(Image.open(image_path))
+        # "with" bloğu dosyayı tahminden sonra kapatır (çok görüntüde açık dosya birikmesin).
+        with Image.open(image_path) as image:
+            return self.predict(image)
