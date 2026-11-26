@@ -54,6 +54,7 @@ class Predictor:
             [config.DISPLAY_NAMES.get(c, c) for c in self.class_names],
         )
         self.img_size: int = ckpt.get("img_size", config.IMG_SIZE)
+        self.arch: str = ckpt.get("arch", "?")  # arayüzde model adını göstermek için
         # Değerlendirme dönüşümü (eğitimdeki val/test ile AYNI: resize+centercrop+normalize).
         self.transform = get_eval_transforms(self.img_size)
 

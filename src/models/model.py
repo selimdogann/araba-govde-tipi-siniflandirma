@@ -11,7 +11,7 @@ Neden TRANSFER LEARNING?
   hem daha hızlı yakınsar hem de DAHA İYİ GENELLEME yapar.
 
 Neden EfficientNet-B0 (varsayılan)?
-  ~5.3M parametre (~20 MB) ile 95 MB sınırının çok altında kalır; "compound scaling"
+  8 sınıflı head ile ~4.0M parametre (diskte ~16 MB); 95 MB sınırının çok altında kalır; "compound scaling"
   sayesinde boyutuna göre yüksek doğruluk verir ve inferansı hızlıdır (arayüzde
   hız puanı için önemli). Kod, aşağıdaki 4 mimariyi de destekler; istenirse
   --arch argümanıyla değiştirilebilir.
